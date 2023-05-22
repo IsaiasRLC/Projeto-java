@@ -144,8 +144,8 @@ public class Login extends javax.swing.JFrame {
                 );
                 
                 
-                conNuvem.update("insert into ComputadorTeste values (?,?,?,?,?)",
-                        8, compMaquina.metodoMacAdress(),  compMaquina.getModelo(), compMaquina.getProcessador(),
+                conNuvem.update("insert into ComputadorTeste values (?,?,?,?)",
+                         compMaquina.metodoMacAdress(),  compMaquina.getModelo(), compMaquina.getProcessador(),
                         compMaquina.getMemoria_ram()
                 );
 
