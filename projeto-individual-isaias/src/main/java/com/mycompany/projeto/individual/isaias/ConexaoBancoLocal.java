@@ -17,7 +17,7 @@ public class ConexaoBancoLocal {
 
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
 
-        dataSource.setUrl("jdbc:mysql://54.166.183.80/HemeraTech"); // trocar o localhost:3306 pelo endereço do banco e o tecflix pelo nome do banco
+        dataSource.setUrl("jdbc:mysql://3.92.203.68/HemeraTech"); // trocar o localhost:3306 pelo endereço do banco e o tecflix pelo nome do banco
 
         dataSource.setUsername("root");
         dataSource.setPassword("sptech");

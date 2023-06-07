@@ -1,40 +1,20 @@
-
 package com.mycompany.projeto.individual.isaias;
+
+import javax.swing.Timer;
 
 /**
  *
  * @author Isaias Resende
  */
 public class Funcionario {
-    private String nome;
-    private String sobrenome;
+
+    private Integer idFuncionario;
     private String email;
     private String senha;
+    private Integer idEmpresa;
 
-//    public Funcionario(String nome, String sobrenome, String email, String senha) {
-//        this.nome = nome;
-//        this.sobrenome = sobrenome;
-//        this.email = email;
-//        this.senha = senha;
-//        
-    
-//        
-//    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getSobrenome() {
-        return sobrenome;
-    }
-
-    public void setSobrenome(String sobrenome) {
-        this.sobrenome = sobrenome;
+    public Integer getIdFuncionario() {
+        return idFuncionario;
     }
 
     public String getEmail() {
@@ -51,12 +31,25 @@ public class Funcionario {
 
     public void setSenha(String senha) {
         this.senha = senha;
-    
-    
     }
+    
+      public Integer getIdEmpresa() {
+        return idEmpresa;
+    }
+
+    public void setIdFuncionario(Integer idFuncionario) {
+        this.idFuncionario = idFuncionario;
+    }
+
+    public void setIdEmpresa(Integer idEmpresa) {
+        this.idEmpresa = idEmpresa;
+    }
+      
+      
 
     @Override
     public String toString() {
-        return " nome=" + nome + " \nsobrenome=" + sobrenome + ", \nemail=" + email + ", \nsenha=" + senha + '}';
+        return "Funcionario{" + "idFuncionario=" + idFuncionario + ", email=" + email + ", senha=" + senha + ", idEmpresa=" + idEmpresa + '}';
     }
+
 }

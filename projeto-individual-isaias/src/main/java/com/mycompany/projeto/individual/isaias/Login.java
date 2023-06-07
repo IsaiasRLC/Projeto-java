@@ -4,7 +4,13 @@
  */
 package com.mycompany.projeto.individual.isaias;
 
+import com.google.common.collect.ComputationException;
 import java.util.List;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import javax.swing.Timer;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -120,44 +126,67 @@ public class Login extends javax.swing.JFrame {
 
         ConexaoBancoLocal conexaoLocal = new ConexaoBancoLocal();
         ConexaoBancoNuvem conexaoNuvem = new ConexaoBancoNuvem();
-        
+
         JdbcTemplate conLocal = conexaoLocal.getbanco();
         JdbcTemplate conNuvem = conexaoNuvem.getBancoNuvem();
-        
+
         Componentes compMaquina = new Componentes();
+        LogAcesso log = new LogAcesso();
 
         String emailDigitado = iptEmail.getText();
         String senhaDigitada = iptSenha.getText();
 
-        List<Funcionario> ListaDeFuncionarios = conNuvem.query("select FuncionarioTeste.email, FuncionarioTeste.senha from FuncionarioTeste;",
+        List<Funcionario> ListaDeFuncionarios = conNuvem.query("select Funcionario.idFuncionario, Funcionario.email,Funcionario.senha,Funcionario.idEmpresa from Funcionario;",
                 new BeanPropertyRowMapper(Funcionario.class));
-//        System.out.println(ListaDeFuncionarios);
 
         for (Funcionario funcionarioDaVez : ListaDeFuncionarios) {
 
             if (funcionarioDaVez.getEmail().equals(emailDigitado) && funcionarioDaVez.getSenha().equals(senhaDigitada)) {
                 lblResposta.setText("Certo");
 
-                conLocal.update("insert into Computador values (?,?,?,?,?,?)",
-                        null, compMaquina.metodoMacAdress(), 1, compMaquina.getModelo(), compMaquina.getProcessador(),
-                        compMaquina.getMemoria_ram()
-                );
-                
-                
-                conNuvem.update("insert into ComputadorTeste (macAddress, modelo, processador, memoria_ram) values (?,?,?,?)",
-                         compMaquina.metodoMacAdress(),  compMaquina.getModelo(), compMaquina.getProcessador(),
-                        compMaquina.getMemoria_ram()
-                );
+                String selectComputador = "select idComputador, idEmpresa from Computador where idEmpresa = ? and MacAddress = ?";
+                List<Computador> computadoresLogadosAzure = conNuvem.query(selectComputador, new BeanPropertyRowMapper<>(Computador.class), funcionarioDaVez.getIdEmpresa(), compMaquina.macAddress());
+                //List<Computador> computadoresLogadosMySql = conMySql.query(selectComputador, new BeanPropertyRowMapper<>(Computador.class), usuarioLogadoMySql.getIdEmpresa(), api.macAddress());
+
+                if (computadoresLogadosAzure.isEmpty()) {
+                    System.out.println("vamos cadastrar esse  computador");
+
+                    conNuvem.update(String.format("insert into Computador (sistema_operacional, modelo, MacAddress, total_memoria, total_armazenamento, idEmpresa) values ('%s','%s','%s','%s','%s',%d)", compMaquina.sistemaOperacional(), compMaquina.modeloProcessador(), compMaquina.macAddress(), compMaquina.totalMemoria(), compMaquina.totalDisco(), funcionarioDaVez.getIdEmpresa()));
+                    log.inserirLoginBanco(funcionarioDaVez, computadoresLogadosAzure.get(0));
+                    System.out.println("Cadastrei os computadores!!");
+
+                } else {
+                    System.out.println("computador já estava cadastrado");
+                    log.inserirLoginBanco(funcionarioDaVez, computadoresLogadosAzure.get(0));
+                }
+
+                System.out.println("COMEÇAR A REGISTRAR DADOS A CADA X SEGUNDOS");
+
+                ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+                executor.scheduleAtFixedRate(() -> {
+
+                    //ConexaoBancoLocal conexaoLocal = new ConexaoBancoLocal();
+                    String selectComputador1 = "select Computador.idComputador, Computador.idEmpresa from Computador where idEmpresa = ? and MacAddress = ?";
+
+                    Computador computadorLogadoAzure = conNuvem.queryForObject(selectComputador1, new BeanPropertyRowMapper<>(Computador.class), funcionarioDaVez.getIdEmpresa(), compMaquina.macAddress());
+                    //  Computador computadorLogadoMysql = conLocal.queryForObject(selectComputador1, new BeanPropertyRowMapper<>(Computador.class), funcionarioDaVez.getIdEmpresa(), compMaquina.macAddress());
+                    System.out.println(computadorLogadoAzure);
+                    try {
+                        compMaquina.inserirDadosAzure(computadorLogadoAzure);
+                        compMaquina.inserirDadosMySql();
+                        //api.inserirDadosMySql(computadorLogadoMySql);'
+                        System.out.println("INSERINDO !!");
+                    } catch (Exception e) {
+                        System.out.println(e);
+                        System.out.println("Erro ao inserir dados");
+                    }
+
+                }, 0, 20, TimeUnit.SECONDS);
 
             } else {
 
-                lblResposta.setText("Invalido");
             }
         }
-//
-//        
-
-//    }
 
     }//GEN-LAST:event_btnConectaActionPerformed
 
